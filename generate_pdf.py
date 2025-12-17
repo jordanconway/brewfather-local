@@ -2,21 +2,14 @@ import json
 import sys
 from fpdf import XPos, YPos
 from pdf_utils import PDF, COLOR_DEEP_CHARCOAL
+from get_recipe_details import get_recipe_details
 
-def generate_pdf(recipe_id):
+def generate_pdf(recipe_data):
     """
-    Generates a PDF for a given recipe ID from the detailed_recipe.json file.
+    Generates a PDF for a given recipe data.
     """
-    try:
-        with open("detailed_recipe.json", "r") as f:
-            recipe_data = json.load(f)
-    except FileNotFoundError:
-        print("Error: detailed_recipe.json not found.")
-        print("Please run 'docker-compose run --rm brewfather-local python get_recipe_details.py > detailed_recipe.json' first.")
-        return
-
-    if recipe_data["_id"] != recipe_id:
-        print(f"Error: Recipe with ID '{recipe_id}' not found in detailed_recipe.json.")
+    if not recipe_data:
+        print("Error: No recipe data provided.")
         return
 
     pdf = PDF()
@@ -107,4 +100,6 @@ if __name__ == "__main__":
         # Use the first recipe ID from the existing recipes.json as a default
         recipe_id = "514t8SJ4n2lLmqT7CRMjMLCD6uiO2N"
         
-    generate_pdf(recipe_id)
+    recipe_data = get_recipe_details(recipe_id)
+    if recipe_data:
+        generate_pdf(recipe_data)

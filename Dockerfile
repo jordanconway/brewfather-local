@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY download_recipes.py .
 COPY get_recipe_details.py .
 COPY generate_pdf.py .
+COPY generate_all_pdfs.py .
 COPY pdf_utils.py .
 COPY brewstepdaddy.png .
 

@@ -37,25 +37,20 @@ RUN_AS_SERVICE=true
 
 When you run the container with this setting, it will continuously download your recipes every 10 minutes, saving each download as a new file with a timestamp (e.g., `recipes_2023-10-27_10-30-00.json`). This is useful for creating a history of your recipe changes.
 
-### Generating Recipe PDFs
+### Generating All Recipe PDFs
 
-To generate a PDF for a specific recipe, you can use the `generate_pdf.py` script.
-First, you need to obtain the detailed JSON data for the recipe using `get_recipe_details.py` and redirect its output to `detailed_recipe.json`.
-Then, you can run the `generate_pdf.py` script.
+To generate a PDF for all of your recipes at once, you can use the `generate_all_pdfs.py` script.
 
-1.  **Get Detailed Recipe JSON:**
+```bash
+docker-compose run --rm brewfather-local python generate_all_pdfs.py
+```
 
-    ```bash
-    docker-compose run --rm brewfather-local python get_recipe_details.py <RECIPE_ID> > detailed_recipe.json
-    ```
-    Replace `<RECIPE_ID>` with the actual ID of the recipe you want to generate a PDF for. You can find recipe IDs in your `recipes.json` file.
+This command will:
+1. Download all of your recipes.
+2. For each recipe, download the detailed information.
+3. Generate a styled PDF with the recipe details and save it in the current directory.
 
-2.  **Generate PDF:**
-
-    ```bash
-    docker-compose run --rm brewfather-local python generate_pdf.py <RECIPE_ID>
-    ```
-    This will create a PDF file named `<RECIPE_NAME>_final.pdf` in your current directory, incorporating styling and the 'brewstepdaddy.png' logo.
+**Note:** This process may take some time depending on the number of recipes you have. A 1-second delay is included between each recipe download to avoid hitting API rate limits.
 
 ### Using `docker-compose`
 
