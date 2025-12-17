@@ -19,3 +19,7 @@ creds.txt
 *~
 *.swp
 .DS_Store
+
+# Generated files
+recipes.json
+recipes_*.json
