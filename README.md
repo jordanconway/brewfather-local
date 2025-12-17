@@ -52,6 +52,21 @@ This command will:
 
 **Note:** This process may take some time depending on the number of recipes you have. A 1-second delay is included between each recipe download to avoid hitting API rate limits.
 
+### Exporting to BeerXML
+
+You can export all of your recipes to BeerXML format. This is useful for importing your recipes into other brewing software.
+
+To export all recipes to BeerXML, run the following command:
+
+```bash
+docker-compose run --rm brewfather-local python export_all_to_beerxml.py
+```
+
+This will:
+1. Download all of your recipes.
+2. For each recipe, download the detailed information.
+3. Generate a BeerXML file for each recipe and save it in the current directory.
+
 ### Using `docker-compose`
 
 This is the easiest way to get started.
