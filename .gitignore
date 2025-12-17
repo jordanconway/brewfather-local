@@ -25,3 +25,4 @@ recipes.json
 recipes_*.json
 detailed_recipe.json
 *_final.pdf
+*.xml

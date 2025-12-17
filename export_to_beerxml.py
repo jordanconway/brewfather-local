@@ -1,12 +1,4 @@
 import sys
-from beerxml.recipe import Recipe
-from beerxml.hop import Hop
-from beerxml.fermentable import Fermentable
-from beerxml.yeast import Yeast
-from beerxml.style import Style
-from beerxml.mash import Mash
-from beerxml.mash_step import MashStep
-
 from get_recipe_details import get_recipe_details
 
 def export_to_beerxml(recipe_data):
@@ -17,86 +9,93 @@ def export_to_beerxml(recipe_data):
         print("Error: No recipe data provided.")
         return
 
-    recipe = Recipe()
-    recipe.name = recipe_data.get("name")
-    recipe.brewer = recipe_data.get("author")
-    recipe.batch_size = recipe_data.get("batchSize")
-    recipe.boil_size = recipe_data.get("boilSize")
-    recipe.boil_time = recipe_data.get("boilTime")
-    recipe.efficiency = recipe_data.get("efficiency")
-    recipe.notes = recipe_data.get("notes")
-
-    # Style
-    if recipe_data.get("style"):
-        style_data = recipe_data["style"]
-        style = Style()
-        style.name = style_data.get("name")
-        style.category = style_data.get("category")
-        style.style_guide = style_data.get("styleGuide")
-        style.type = style_data.get("type")
-        recipe.style = style
-
-    # Hops
+    recipe_name = recipe_data.get("name", "Unknown Recipe")
+    if not recipe_name or recipe_name.isspace():
+        recipe_name = f"recipe_{recipe_data.get('_id', 'unknown_id')}"
+    
+    xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    xml += '<RECIPES>\n'
+    xml += '  <RECIPE>\n'
+    xml += f'    <NAME>{recipe_name}</NAME>\n'
+    xml += f'    <VERSION>1</VERSION>\n'
+    xml += f'    <TYPE>{recipe_data.get("type", "All Grain")}</TYPE>\n'
+    xml += f'    <BREWER>{recipe_data.get("author", "")}</BREWER>\n'
+    xml += f'    <BATCH_SIZE>{recipe_data.get("batchSize", 0)}</BATCH_SIZE>\n'
+    xml += f'    <BOIL_SIZE>{recipe_data.get("boilSize", 0)}</BOIL_SIZE>\n'
+    xml += f'    <BOIL_TIME>{recipe_data.get("boilTime", 0)}</BOIL_TIME>\n'
+    xml += f'    <EFFICIENCY>{recipe_data.get("efficiency", 0)}</EFFICIENCY>\n'
+    
     if recipe_data.get("hops"):
-        for hop_data in recipe_data["hops"]:
-            hop = Hop()
-            hop.name = hop_data.get("name")
-            hop.alpha = hop_data.get("alpha")
-            hop.amount = hop_data.get("amount") / 1000 # convert g to kg
-            hop.use = hop_data.get("use")
-            hop.time = hop_data.get("time")
-            recipe.hops.append(hop)
-            
-    # Fermentables
+        xml += '    <HOPS>\n'
+        for hop in recipe_data["hops"]:
+            xml += '      <HOP>\n'
+            xml += f'        <NAME>{hop.get("name")}</NAME>\n'
+            xml += f'        <VERSION>1</VERSION>\n'
+            xml += f'        <ALPHA>{hop.get("alpha")}</ALPHA>\n'
+            xml += f'        <AMOUNT>{hop.get("amount") / 1000}</AMOUNT>\n'
+            xml += f'        <USE>{hop.get("use")}</USE>\n'
+            xml += f'        <TIME>{hop.get("time")}</TIME>\n'
+            xml += f'        <FORM>{hop.get("type")}</FORM>\n'
+            xml += '      </HOP>\n'
+        xml += '    </HOPS>\n'
+
     if recipe_data.get("fermentables"):
-        for fermentable_data in recipe_data["fermentables"]:
-            fermentable = Fermentable()
-            fermentable.name = fermentable_data.get("name")
-            fermentable.amount = fermentable_data.get("amount")
-            fermentable.type = fermentable_data.get("type")
-            fermentable.color = fermentable_data.get("color")
-            recipe.fermentables.append(fermentable)
-            
-    # Yeasts
+        xml += '    <FERMENTABLES>\n'
+        for fermentable in recipe_data["fermentables"]:
+            xml += '      <FERMENTABLE>\n'
+            xml += f'        <NAME>{fermentable.get("name")}</NAME>\n'
+            xml += f'        <VERSION>1</VERSION>\n'
+            xml += f'        <TYPE>{fermentable.get("type")}</TYPE>\n'
+            xml += f'        <AMOUNT>{fermentable.get("amount")}</AMOUNT>\n'
+            xml += f'        <YIELD>{fermentable.get("potentialPercentage", 0)}</YIELD>\n'
+            xml += f'        <COLOR>{fermentable.get("color", 0)}</COLOR>\n'
+            xml += '      </FERMENTABLE>\n'
+        xml += '    </FERMENTABLES>\n'
+        
     if recipe_data.get("yeasts"):
-        for yeast_data in recipe_data["yeasts"]:
-            yeast = Yeast()
-            yeast.name = yeast_data.get("name")
-            yeast.amount = yeast_data.get("amount")
-            yeast.type = yeast_data.get("type")
-            yeast.form = yeast_data.get("form")
-            yeast.attenuation = yeast_data.get("attenuation")
-            recipe.yeasts.append(yeast)
+        xml += '    <YEASTS>\n'
+        for yeast in recipe_data["yeasts"]:
+            xml += '      <YEAST>\n'
+            xml += f'        <NAME>{yeast.get("name")}</NAME>\n'
+            xml += f'        <VERSION>1</VERSION>\n'
+            xml += f'        <TYPE>{yeast.get("type")}</TYPE>\n'
+            xml += f'        <FORM>{yeast.get("form")}</FORM>\n'
+            xml += f'        <AMOUNT>{yeast.get("amount") / 1000}</AMOUNT>\n'
+            xml += f'        <ATTENUATION>{yeast.get("attenuation")}</ATTENUATION>\n'
+            xml += '      </YEAST>\n'
+        xml += '    </YEASTS>\n'
 
-    # Mash
     if recipe_data.get("mash") and recipe_data["mash"].get("steps"):
-        mash = Mash()
-        for step_data in recipe_data["mash"]["steps"]:
-            mash_step = MashStep()
-            mash_step.name = step_data.get("name")
-            mash_step.step_time = step_data.get("stepTime")
-            mash_step.step_temp = step_data.get("stepTemp")
-            mash_step.type = step_data.get("type")
-            mash.mash_steps.append(mash_step)
-        recipe.mash = mash
+        xml += '    <MASH>\n'
+        xml += f'      <NAME>Mash</NAME>\n'
+        xml += f'      <VERSION>1</VERSION>\n'
+        xml += f'      <GRAIN_TEMP>20.0</GRAIN_TEMP>\n'
+        xml += '      <MASH_STEPS>\n'
+        for step in recipe_data["mash"]["steps"]:
+            xml += '        <MASH_STEP>\n'
+            xml += f'          <NAME>{step.get("name")}</NAME>\n'
+            xml += f'          <VERSION>1</VERSION>\n'
+            xml += f'          <TYPE>{step.get("type")}</TYPE>\n'
+            xml += f'          <STEP_TEMP>{step.get("stepTemp")}</STEP_TEMP>\n'
+            xml += f'          <STEP_TIME>{step.get("stepTime")}</STEP_TIME>\n'
+            xml += '        </MASH_STEP>\n'
+        xml += '      </MASH_STEPS>\n'
+        xml += '    </MASH>\n'
 
-    # Generate XML
-    xml_string = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    xml_string += "".join(recipe.to_xml())
+    xml += '  </RECIPE>\n'
+    xml += '</RECIPES>\n'
 
-    # Save to file
-    filename = f"{recipe.name.replace(' ', '_')}.xml"
+    filename = f"{recipe_name.replace(' ', '_')}.xml"
     with open(filename, "w") as f:
-        f.write(xml_string)
+        f.write(xml)
 
-    print(f"Successfully exported {recipe.name} to {filename}")
+    print(f"Successfully exported {recipe_name} to {filename}")
 
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         recipe_id = sys.argv[1]
     else:
-        # Use the first recipe ID from the existing recipes.json as a default
         recipe_id = "514t8SJ4n2lLmqT7CRMjMLCD6uiO2N"
 
     recipe_data = get_recipe_details(recipe_id)
