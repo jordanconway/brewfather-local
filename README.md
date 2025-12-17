@@ -25,6 +25,18 @@ cp .env.template .env
 
 Then edit the `.env` file with your credentials.
 
+### Running as a Service
+
+You can also run this container as a persistent service that checks for changes on a 10 minute interval and dumps the changes with a date stamp in the json file title.
+
+To enable this mode, set the `RUN_AS_SERVICE` variable in your `.env` file to `true`:
+
+```
+RUN_AS_SERVICE=true
+```
+
+When you run the container with this setting, it will continuously download your recipes every 10 minutes, saving each download as a new file with a timestamp (e.g., `recipes_2023-10-27_10-30-00.json`). This is useful for creating a history of your recipe changes.
+
 ### Using `docker-compose`
 
 This is the easiest way to get started.
@@ -35,7 +47,7 @@ Run `docker-compose` to build and run the container:
 docker-compose up
 ```
 
-This will pull the latest image from `ghcr.io`, run the container, and save your recipes to `recipes.json`.
+This will pull the latest image from `ghcr.io`, run the container, and save your recipes to `recipes.json`. If you have `RUN_AS_SERVICE` set to `true`, it will run in detached mode automatically and start saving timestamped files.
 
 ### Using the Pre-built Docker Image
 

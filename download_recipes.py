@@ -2,8 +2,10 @@
 import os
 import requests
 import json
+import time
+from datetime import datetime
 
-def download_recipes():
+def download_and_save_recipes(filename="recipes.json"):
     """
     Downloads all recipes from the Brewfather API and saves them to a local file.
     """
@@ -25,11 +27,21 @@ def download_recipes():
 
     if response.status_code == 200:
         recipes = response.json()
-        with open("recipes.json", "w") as f:
+        with open(filename, "w") as f:
             json.dump(recipes, f, indent=4)
-        print(f"Successfully downloaded {len(recipes)} recipes to recipes.json")
+        print(f"Successfully downloaded {len(recipes)} recipes to {filename}")
     else:
         print(f"Error: {response.status_code} - {response.text}")
 
 if __name__ == "__main__":
-    download_recipes()
+    run_as_service = os.environ.get("RUN_AS_SERVICE", "false").lower() == "true"
+    
+    if run_as_service:
+        while True:
+            timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            filename = f"recipes_{timestamp}.json"
+            download_and_save_recipes(filename)
+            print("Waiting 10 minutes before next download...")
+            time.sleep(600)
+    else:
+        download_and_save_recipes()
