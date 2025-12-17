@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   brewfather-local:
+    build: .
     image: ghcr.io/jordanconway/brewfather-local:latest
     container_name: brewfather-local
     env_file:

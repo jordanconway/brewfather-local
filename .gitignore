@@ -23,3 +23,5 @@ creds.txt
 # Generated files
 recipes.json
 recipes_*.json
+detailed_recipe.json
+*_final.pdf
